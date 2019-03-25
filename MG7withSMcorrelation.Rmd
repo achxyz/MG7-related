@@ -1,0 +1,72 @@
+---
+title: "MG7a/b~SMcorrelation"
+author: "Chen Cheng"
+date: "3/25/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## clean space
+```{r}
+rm(list=ls())
+```
+## set directory
+```{r}
+setwd("/Users/Chen/Dropbox/2.Chen's new experiment/MG7/MG7")
+```
+## load packages
+```{r}
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+```
+
+## import data
+```{r}
+SMdata <- read.csv("SwapMoveResults.csv")
+```
+## correlation plot with color indicates conditions
+```{r echo = FALSE}
+ggplot(SMdata, aes(x = MG7_TFF, y = SM_TFF, color = MG7condition)) +
+  geom_point() + 
+  geom_smooth(aes(group = 1), method = "lm") 
+```
+
+## correlation stats in both exps
+```{r}
+cor.test(SMdata$MG7_TFF, SMdata$SM_TFF,
+         alternative = c("two.sided"),
+         method = c("pearson"),
+         exact = NULL, conf.level = 0.95,continuity = FALSE)
+
+summary(lm(SM_TFF~MG7_TFF, data = SMdata))
+```
+# two sample t-test between median split data
+```{r}
+MG7sorted <- SMdata %>% arrange(MG7_TFF) %>% 
+  mutate(Mediansplitgroup = ifelse(MG7_TFF<median(MG7_TFF), "low","high"))
+
+t.test(SM_TFF ~ Mediansplitgroup, data = MG7sorted, alternative = "greater") 
+```
+## correlation stats in exp2 only
+```{r}
+SM_exp <- SMdata %>% filter(MG7condition =="exp2")
+
+cor.test(SM_exp$MG7_TFF, SM_exp$SM_TFF,
+         alternative = c("two.sided"),
+         method = c("pearson"),
+         exact = NULL, conf.level = 0.95,continuity = FALSE)
+
+summary(lm(SM_TFF~MG7_TFF, data = SM_exp))
+```
+
+# two sample t-test between median split data in exp2 only
+```{r}
+MG7sorted <- SM_exp %>% arrange(MG7_TFF) %>% 
+  mutate(Mediansplitgroup = ifelse(MG7_TFF<median(MG7_TFF), "low","high"))
+
+t.test(SM_TFF ~ Mediansplitgroup, data = MG7sorted, alternative = "greater") 
+```
